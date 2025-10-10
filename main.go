@@ -12,15 +12,23 @@ func main() {
 	// load configuration from environment variables
 	cfg := config.Load()
 
-	log.Printf("starting server on %s:%s...", cfg.Host, cfg.Port)
+	log.Printf("starting server on %s:%s...", cfg.Server.Host, cfg.Server.Port)
 
-	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)
+	address := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Panicf("unable to listen to tcp port %s: %v", cfg.Port, err)
+		log.Panicf("unable to listen to tcp port %s: %v", cfg.Server.Port, err)
 	}
-	defer listener.Close()
+	defer func() {
+		log.Println("closing tcp connection")
+		_ = listener.Close()
+	}()
 
 	log.Printf("server listening on %s", address)
-	log.Println("goodby for now...")
+
+	log.Printf("connecting to database %s...", cfg.Name)
+
+	_ = config.OpenConnection(cfg.Database)
+
+	log.Println("goodbye for now...")
 }
