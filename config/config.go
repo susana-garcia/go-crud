@@ -47,18 +47,18 @@ func Load() *Config {
 
 	config := &Config{
 		Server: Server{
-			Port: getEnv("PORT", "8080"),
-			Host: getEnv("HOST", "localhost"),
+			Port: GetEnv("PORT", "8080"),
+			Host: GetEnv("HOST", "localhost"),
 		},
 		Database: Database{
-			Port:     getEnv("DB_PORT", "5432"),
-			Host:     getEnv("DB_HOST", "localhost"),
-			Name:     getEnv("DB_NAME", "go-crud"),
-			User:     getEnv("DB_USER", "postgres"),
-			Password: getEnv("DB_PASSWORD", "postgres"),
+			Port:     GetEnv("DB_PORT", "5432"),
+			Host:     GetEnv("DB_HOST", "localhost"),
+			Name:     GetEnv("DB_NAME", "gocrud"),
+			User:     GetEnv("DB_USER", "gocrud"),
+			Password: GetEnv("DB_PASSWORD", "gocrud"),
 		},
-		LogLevel: getEnv("LOG_LEVEL", "info"),
-		Debug:    getEnvBool("DEBUG", false),
+		LogLevel: GetEnv("LOG_LEVEL", "info"),
+		Debug:    GetEnvBool("DEBUG", false),
 	}
 
 	log.Printf("configuration loaded: port=%s, host=%s, log_level=%s, debug=%t",
@@ -93,16 +93,16 @@ func OpenConnection(cfg Database) *gorm.DB {
 	return database
 }
 
-// getEnv gets an environment variable or returns a default value
-func getEnv(key, defaultValue string) string {
+// GetEnv gets an environment variable or returns a default value
+func GetEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}
 	return defaultValue
 }
 
-// getEnvBool gets a boolean environment variable or returns a default value
-func getEnvBool(key string, defaultValue bool) bool {
+// GetEnvBool gets a boolean environment variable or returns a default value
+func GetEnvBool(key string, defaultValue bool) bool {
 	if value := os.Getenv(key); value != "" {
 		if parsed, err := strconv.ParseBool(value); err == nil {
 			return parsed

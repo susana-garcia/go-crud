@@ -1,0 +1,85 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "./pb";
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service Blogger {
+    rpc GetBlog(GetBlogRequest) returns (GetBlogResponse) {}
+    rpc GetBlogs(GetBlogsRequest) returns (GetBlogsResponse){}
+    rpc CreateBlog(CreateBlogRequest) returns (CreateBlogResponse) {}
+    rpc UpdateBlog(UpdateBlogRequest) returns (google.protobuf.Empty) {}
+    rpc DeleteBlog(DeleteBlogRequest) returns (google.protobuf.Empty) {}
+}
+
+message GetBlogRequest {
+    oneof value {
+        option (buf.validate.oneof).required = true;
+        uint32 id = 1 [
+            (buf.validate.field).uint32 = { gte: 1 }
+        ];
+        string title = 2 [(buf.validate.field).string.min_len = 3];
+    }
+}
+
+message Blog {
+    uint32 id = 1;
+    string title = 2;
+    string body = 3;
+    google.protobuf.Timestamp created_at = 4;
+    google.protobuf.Timestamp updated_at = 5;
+}
+
+message GetBlogResponse {
+    Blog item = 1 [(buf.validate.field).required = true];
+}
+
+message GetBlogsRequest {
+    int32 limit = 1 [(buf.validate.field).int32.lt = 100];
+    int32 page = 2;
+    string sort = 3;
+}
+
+message GetBlogsResponse {
+    repeated Blog items = 1;
+    int32 limit = 2;
+    int32 page = 3;
+    string sort = 4;
+    int32 total_items = 5;
+    int32 total_pages = 6;
+
+}
+
+message CreateBlogRequest {
+    string title = 1 [
+        (buf.validate.field).string.min_len = 3,
+        (buf.validate.field).string.max_len = 30
+    ];
+    string body = 2 [
+        (buf.validate.field).string.min_len = 3,
+        (buf.validate.field).string.max_len = 100
+    ];
+}
+
+message CreateBlogResponse {
+    uint32 id = 1;
+}
+
+message UpdateBlogRequest {
+    option (buf.validate.message).cel = {
+        id: "at_least_one_param"
+        message: "At least one of title or body must be set"
+        expression: "has(this.title) || has(this.body)"
+    };
+
+    uint32 id = 1;
+    string title = 2 ;
+    string body = 3 ;
+}
+
+message DeleteBlogRequest {
+    uint32 id = 1 [(buf.validate.field).required = true];
+}

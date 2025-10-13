@@ -36,3 +36,16 @@ start-postgres: ## Starts a local postgres instance
 .PHONY: stop-postgres
 stop-postgres: ## Stops local postgres instance
 	@docker container stop $(shell docker container ls -q --filter name=postgres)
+
+.PHONY: start-postgres-test
+start-postgres-test: ## Starts a local postgres instance for testing
+	docker run -d --rm --name postgrestest -e POSTGRES_USER=gocrudtest -e POSTGRES_PASSWORD=gocrudtest -v gocrudtest-data:/var/lib/postgresql/data -p 5435:5432 postgres:18
+	PG_PASSWORD=gocrudtest docker exec postgrestest psql -d postgres -h localhost -U gocrudtest -w -c 'CREATE DATABASE gocrudtest' || echo "DB already exists - error can be ignored"
+
+.PHONY: generate
+generate: 
+	go generate ./...
+
+.PHONY: test
+test: ## Runs tests
+	go test -tags integration ./...
